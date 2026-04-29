@@ -97,22 +97,32 @@
     }
     .sec-dot {
         display: flex; align-items: center; gap: 8px;
-        opacity: .25; transition: opacity .4s;
+        opacity: .3; transition: opacity .4s;
         cursor: pointer;
     }
     .sec-dot.active { opacity: 1; }
     .sec-dot-label {
-        font-size: 10px; font-weight: 500; letter-spacing: .12em;
-        text-transform: uppercase; color: var(--white);
+        font-size: 10px; font-weight: 600; letter-spacing: .1em;
+        text-transform: uppercase;
+        /* Dark pill so it's readable on both light and dark sections */
+        background: rgba(0,0,0,.72);
+        color: #fff;
+        padding: 3px 8px;
+        border-radius: 2px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         opacity: 0; transform: translateX(8px);
         transition: opacity .3s, transform .3s;
         white-space: nowrap;
+        pointer-events: none;
     }
     .sec-dot.active .sec-dot-label { opacity: 1; transform: translateX(0); }
     .sec-dot-pip {
         width: 4px; height: 4px; border-radius: 50%;
         background: var(--white);
         transition: width .3s var(--ease);
+        /* Dark outline so pip shows on white sections */
+        box-shadow: 0 0 0 1px rgba(0,0,0,.2);
     }
     .sec-dot.active .sec-dot-pip { width: 16px; border-radius: 2px; }
 
@@ -1217,18 +1227,24 @@
             if (sec) sec.scrollIntoView({ behavior: 'smooth' });
         });
     });
-    const secObs = new IntersectionObserver(entries => {
-        entries.forEach(e => {
-            if (e.isIntersecting) {
-                const idx = sections.indexOf(e.target.id);
-                dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-            }
+
+    /* Scroll-based: activate whichever section's midpoint is closest to viewport center */
+    function updateActiveDot() {
+        const mid = window.innerHeight / 2;
+        let closestIdx = 0;
+        let closestDist = Infinity;
+        sections.forEach((id, i) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const sectionMid = rect.top + rect.height / 2;
+            const dist = Math.abs(sectionMid - mid);
+            if (dist < closestDist) { closestDist = dist; closestIdx = i; }
         });
-    }, { threshold: 0.4 });
-    sections.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) secObs.observe(el);
-    });
+        dots.forEach((d, i) => d.classList.toggle('active', i === closestIdx));
+    }
+    window.addEventListener('scroll', updateActiveDot, { passive: true });
+    updateActiveDot();
 
     /* ── Hero parallax ─────────────────────────────────── */
     const heroName = document.querySelector('.hero-name');
