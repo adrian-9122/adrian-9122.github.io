@@ -40,40 +40,12 @@
         background: var(--black);
         color: var(--white);
         overflow-x: hidden;
-        cursor: none;
     }
 
     a { color: inherit; text-decoration: none; }
     ul { list-style: none; }
 
-    /* ============================================================
-       CUSTOM CURSOR
-    ============================================================ */
-    #cur {
-        width: 10px; height: 10px;
-        background: var(--white);
-        border-radius: 50%;
-        position: fixed; top: 0; left: 0;
-        pointer-events: none; z-index: 9999;
-        transform: translate(-50%, -50%);
-        mix-blend-mode: difference;
-        will-change: transform;
-        transition: width .3s var(--ease), height .3s var(--ease);
-    }
-    #cur-ring {
-        width: 38px; height: 38px;
-        border: 1px solid rgba(255,255,255,.3);
-        border-radius: 50%;
-        position: fixed; top: 0; left: 0;
-        pointer-events: none; z-index: 9998;
-        transform: translate(-50%, -50%);
-        will-change: transform;
-        transition: width .3s var(--ease), height .3s var(--ease), border-color .3s;
-    }
-    body:has(a:hover) #cur, body:has(.skill-tag:hover) #cur { width: 18px; height: 18px; }
-    body:has(a:hover) #cur-ring, body:has(.skill-tag:hover) #cur-ring { width: 64px; height: 64px; border-color: rgba(255,255,255,.12); }
-
-    @media (pointer: coarse) { #cur, #cur-ring { display: none; } body { cursor: auto; } }
+    @media (pointer: coarse) { body { cursor: auto; } }
 
     /* ============================================================
        SCROLL PROGRESS
@@ -504,7 +476,7 @@
     }
     .proj-card {
         position: relative; overflow: hidden;
-        background: var(--dark3); aspect-ratio: 4/3; cursor: none;
+        background: var(--dark3); aspect-ratio: 4/3;
     }
     .proj-img {
         width: 100%; height: 100%; object-fit: cover;
@@ -566,7 +538,7 @@
     .skill-tag {
         padding: 11px 22px; background: var(--white);
         border: 1px solid var(--light); font-size: 14px; font-weight: 500;
-        color: var(--dark); cursor: none;
+        color: var(--dark);
         transition: background .25s, color .25s, border-color .25s, transform .25s var(--ease), box-shadow .25s;
     }
     .skill-tag:hover {
@@ -638,13 +610,87 @@
         from { transform: translateX(0); }
         to   { transform: translateX(-50%); }
     }
+
+    /* ============================================================
+       CAPTCHA MODAL
+    ============================================================ */
+    #captcha-overlay {
+        position: fixed; inset: 0; z-index: 20000;
+        background: rgba(0,0,0,.75);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none;
+        transition: opacity .3s;
+    }
+    #captcha-overlay.open { opacity: 1; pointer-events: auto; }
+
+    #captcha-box {
+        background: var(--dark2);
+        border: 1px solid rgba(255,255,255,.1);
+        padding: 48px 40px;
+        max-width: 380px; width: 90%;
+        position: relative;
+        transform: translateY(16px);
+        transition: transform .35s var(--ease);
+    }
+    #captcha-overlay.open #captcha-box { transform: translateY(0); }
+
+    #captcha-box h3 {
+        font-family: var(--ff-disp); font-size: 22px; font-weight: 700;
+        letter-spacing: -.02em; margin-bottom: 8px;
+    }
+    #captcha-box p {
+        font-size: 13px; color: var(--g4); margin-bottom: 28px; line-height: 1.6;
+    }
+    #captcha-question {
+        font-size: 18px; font-weight: 600; color: var(--white);
+        margin-bottom: 16px; letter-spacing: -.01em;
+    }
+    #captcha-input {
+        width: 100%; padding: 14px 16px;
+        background: rgba(255,255,255,.05);
+        border: 1px solid rgba(255,255,255,.12);
+        color: var(--white); font-size: 16px; font-family: var(--ff-body);
+        outline: none; transition: border-color .25s;
+        -moz-appearance: textfield;
+    }
+    #captcha-input::-webkit-outer-spin-button,
+    #captcha-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    #captcha-input:focus { border-color: rgba(255,255,255,.4); }
+    #captcha-error {
+        font-size: 12px; color: #e05555; margin-top: 8px; min-height: 18px;
+    }
+    #captcha-submit {
+        width: 100%; margin-top: 24px; padding: 15px;
+        background: var(--white); color: var(--black);
+        font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+        border: none; cursor: pointer; font-family: var(--ff-body);
+        transition: background .25s, transform .2s;
+    }
+    #captcha-submit:hover { background: var(--light); transform: translateY(-1px); }
+    #captcha-close {
+        position: absolute; top: 16px; right: 20px;
+        font-size: 20px; color: var(--g3); cursor: pointer;
+        transition: color .2s; background: none; border: none; line-height: 1;
+    }
+    #captcha-close:hover { color: var(--white); }
     </style>
 </head>
 <body>
 
-<!-- Cursor -->
-<div id="cur"></div>
-<div id="cur-ring"></div>
+<!-- CAPTCHA Modal -->
+<div id="captcha-overlay" role="dialog" aria-modal="true" aria-labelledby="captcha-title">
+    <div id="captcha-box">
+        <button id="captcha-close" aria-label="Close">&times;</button>
+        <h3 id="captcha-title">One quick check</h3>
+        <p>Solve the equation below to download the resume.</p>
+        <div id="captcha-question"></div>
+        <input id="captcha-input" type="number" placeholder="Your answer" autocomplete="off">
+        <div id="captcha-error"></div>
+        <button id="captcha-submit">Download Resume</button>
+    </div>
+</div>
 
 <!-- Progress bar -->
 <div id="progress"></div>
@@ -717,13 +763,14 @@
         <span class="line"><span class="line-inner">Gomez.</span></span>
     </h1>
     <p class="hero-sub">
-        Full-stack developer at GE Appliances building systems that scale —
-        driven by curiosity, shaped by both code and business thinking.
+        AI Solutions Architect at GE Appliances building and deploying
+        production-ready AI agents — bridging deep technical expertise with
+        strategic business insight.
     </p>
     <div class="hero-cta">
-        <a href="assets/Adrian_Gomez_Resume_2025.pdf" class="btn-wh" download="Adrian_Gomez_Resume.pdf">
+        <button class="btn-wh resume-dl-btn" type="button">
             Download Resume
-        </a>
+        </button>
         <a href="#about" class="btn-out">View Work</a>
     </div>
     <div class="hero-bottom">
@@ -769,8 +816,10 @@
         <div class="about-grid">
             <div class="about-body rev d2">
                 <p>
-                    I'm a <strong>software developer</strong> at <strong>GE Appliances</strong>,
-                    working within the Digital Leadership Development Program in Louisville, KY.
+                    I'm an <strong>AI Solutions Architect</strong> at <strong>GE Appliances</strong>,
+                    building and deploying production-ready AI agents on Google Cloud in Louisville, KY.
+                    I'm also pursuing an <strong>MS in Business Analytics (AI Concentration)</strong>
+                    at the University of Louisville — GPA 3.9.
                 </p>
                 <p>
                     I hold dual degrees in <strong>Computer Science</strong> and
@@ -779,8 +828,8 @@
                     a rare lens: I write clean code <em>and</em> understand the business context behind it.
                 </p>
                 <p>
-                    My work spans full-stack development, data pipelines, cloud automation,
-                    and Agile team delivery. I thrive at the intersection of
+                    My work spans AI agent engineering, cloud infrastructure, systems analysis,
+                    and Agile delivery. I thrive at the intersection of
                     technical precision and real-world impact.
                 </p>
             </div>
@@ -790,16 +839,12 @@
                     <div class="stat-lbl">Years professional experience</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-num">2</div>
-                    <div class="stat-lbl">Bachelor's degrees earned</div>
+                    <div class="stat-num">3</div>
+                    <div class="stat-lbl">Degrees earned or in progress</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-num">CL</div>
-                    <div class="stat-lbl">Graduated Cum Laude</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num">∞</div>
-                    <div class="stat-lbl">Problems solved with code</div>
+                    <div class="stat-num">3.9</div>
+                    <div class="stat-lbl">Graduate GPA at U of L</div>
                 </div>
             </div>
         </div>
@@ -819,45 +864,57 @@
         <div class="exp-list">
             <div class="exp-row rev d2">
                 <div class="exp-meta">
-                    <div class="exp-period">July 2024<br>Present</div>
+                    <div class="exp-period">Jan 2026<br>Present</div>
                 </div>
                 <div class="exp-body">
                     <div class="exp-co">GE Appliances</div>
-                    <div class="exp-title-role">Digital Leadership Development Program Associate</div>
+                    <div class="exp-title-role">AI Solutions Architect</div>
                     <ul class="exp-bullets">
-                        <li>Diagnosed and resolved Java code issues within critical business systems</li>
-                        <li>Managed tasks and tracked progress using Jira for efficient workflow coordination</li>
-                        <li>Participated in daily stand-ups as part of an Agile Scrum team to drive project success</li>
-                        <li>Created and published Tableau workbooks for business insights and performance tracking</li>
-                        <li>Developed Power Automate cloud flows to streamline business processes</li>
+                        <li>Refined and productionized AI agents to streamline Jira ticket workflows, improving engineering efficiency and reducing manual overhead</li>
+                        <li>Developed a code generation agent that automatically produces code from ticket requirements and acceptance criteria, reducing development cycle time</li>
+                        <li>Deployed AI agents on Google Cloud using Terraform, optimizing infrastructure costs and ensuring scalable, production-ready delivery</li>
                     </ul>
                 </div>
             </div>
             <div class="exp-row rev d3">
                 <div class="exp-meta">
-                    <div class="exp-period">May 2023<br>Aug 2023</div>
+                    <div class="exp-period">Jul 2025<br>Jan 2026</div>
                 </div>
                 <div class="exp-body">
-                    <div class="exp-co">Menards</div>
-                    <div class="exp-title-role">Management Intern</div>
+                    <div class="exp-co">GE Appliances</div>
+                    <div class="exp-title-role">Associate Business Systems Analyst</div>
                     <ul class="exp-bullets">
-                        <li>12-week structured management internship program</li>
-                        <li>Managed and maintained full department operations</li>
-                        <li>Supervised payroll-to-sales metrics and visual merchandising</li>
-                        <li>Conducted regular department meetings and performance reviews</li>
+                        <li>Managed and delivered projects using Waterfall and Agile methodologies, ensuring on-time execution across cross-functional teams</li>
+                        <li>Conducted audits of legal data assets to ensure retention compliance and business relevance</li>
+                        <li>Proposed and presented improvements to legacy business processes, increasing operational efficiency</li>
                     </ul>
                 </div>
             </div>
             <div class="exp-row rev d4">
                 <div class="exp-meta">
-                    <div class="exp-period">Jan 2023<br>May 2023</div>
+                    <div class="exp-period">Jan 2025<br>Jul 2025</div>
                 </div>
                 <div class="exp-body">
-                    <div class="exp-co">Aurora University</div>
-                    <div class="exp-title-role">Subject Peer Tutor</div>
+                    <div class="exp-co">GE Appliances</div>
+                    <div class="exp-title-role">Associate Cloud Developer</div>
                     <ul class="exp-bullets">
-                        <li>Tutored students in computer science, business, and mathematics courses</li>
-                        <li>Facilitated collaborative problem-solving to reinforce conceptual understanding</li>
+                        <li>Diagnosed and resolved Java code issues within critical business systems, reducing production defects</li>
+                        <li>Migrated repositories from GitHub Enterprise to GitHub.com with minimal disruption to development workflows</li>
+                        <li>Participated in daily Agile Scrum stand-ups and managed tasks in Jira for efficient workflow coordination</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="exp-row rev d5">
+                <div class="exp-meta">
+                    <div class="exp-period">Jul 2024<br>Jan 2025</div>
+                </div>
+                <div class="exp-body">
+                    <div class="exp-co">GE Appliances</div>
+                    <div class="exp-title-role">Associate Systems Analyst</div>
+                    <ul class="exp-bullets">
+                        <li>Created, designed, and published Tableau workbooks for business insights and performance tracking</li>
+                        <li>Developed and implemented Power Automate cloud flows to streamline business processes</li>
+                        <li>Authored SOPs and user guides; established and tested Tableau Server connectivity between front-end and back-end</li>
                     </ul>
                 </div>
             </div>
@@ -875,7 +932,48 @@
             <hr>
         </div>
         <h2 class="s-title rev d1">Academic<br>foundation.</h2>
-        <div class="edu-card rev d2">
+        <!-- University of Louisville -->
+        <div class="edu-card rev d2" style="margin-bottom: 2px;">
+            <div class="edu-inner">
+                <div class="edu-left">
+                    <div class="edu-univ">University<br>of Louisville</div>
+                    <div class="edu-yr">2025 — 2026</div>
+                    <div class="edu-degrees">
+                        <div class="edu-deg">
+                            <div class="edu-deg-name">MS Business Analytics</div>
+                            <div class="edu-deg-type">AI Concentration · GPA 3.9/4.0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="edu-right">
+                    <div class="edu-honors">
+                        <div class="edu-hon">
+                            <div class="edu-hon-ico"><i class="fa fa-flask" aria-hidden="true"></i></div>
+                            <div class="edu-hon-text">
+                                <h4>Focus: AI Agent Development</h4>
+                                <p>Advanced Analytics, Machine Learning, and production AI systems on Google Cloud.</p>
+                            </div>
+                        </div>
+                        <div class="edu-hon">
+                            <div class="edu-hon-ico"><i class="fa fa-certificate" aria-hidden="true"></i></div>
+                            <div class="edu-hon-text">
+                                <h4>Google Generative AI Leader</h4>
+                                <p>Certified by Google. Issued Feb 2026 · Expires Feb 2029.</p>
+                            </div>
+                        </div>
+                        <div class="edu-hon">
+                            <div class="edu-hon-ico"><i class="fa fa-cloud" aria-hidden="true"></i></div>
+                            <div class="edu-hon-text">
+                                <h4>AWS Certified Cloud Practitioner</h4>
+                                <p>Certified by Amazon Web Services. Issued Jul 2025 · Expires Jul 2028.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Aurora University -->
+        <div class="edu-card rev d3">
             <div class="edu-inner">
                 <div class="edu-left">
                     <div class="edu-univ">Aurora<br>University</div>
@@ -883,11 +981,11 @@
                     <div class="edu-degrees">
                         <div class="edu-deg">
                             <div class="edu-deg-name">B.S. Computer Science</div>
-                            <div class="edu-deg-type">Bachelor of Science</div>
+                            <div class="edu-deg-type">Bachelor of Science · GPA 3.63/4.0</div>
                         </div>
                         <div class="edu-deg">
                             <div class="edu-deg-name">B.A. Business Administration</div>
-                            <div class="edu-deg-type">Bachelor of Arts</div>
+                            <div class="edu-deg-type">Bachelor of Arts · Cum Laude</div>
                         </div>
                     </div>
                 </div>
@@ -897,7 +995,7 @@
                             <div class="edu-hon-ico"><i class="fa fa-star" aria-hidden="true"></i></div>
                             <div class="edu-hon-text">
                                 <h4>Graduated Cum Laude</h4>
-                                <p>Recognized for sustained academic excellence throughout the program, maintaining a GPA qualifying for Latin honors.</p>
+                                <p>Recognized for sustained academic excellence, maintaining a GPA qualifying for Latin honors. Dean's List 2022–2023.</p>
                             </div>
                         </div>
                         <div class="edu-hon">
@@ -981,33 +1079,44 @@
             <div class="sk-group rev d2">
                 <div class="sk-group-lbl">Languages</div>
                 <div class="sk-tags">
-                    <span class="skill-tag">JavaScript</span>
                     <span class="skill-tag">Python</span>
                     <span class="skill-tag">Java</span>
-                    <span class="skill-tag">C#</span>
+                    <span class="skill-tag">SQL</span>
+                    <span class="skill-tag">JavaScript</span>
                     <span class="skill-tag">C++</span>
+                    <span class="skill-tag">C#</span>
                 </div>
             </div>
             <div class="sk-group rev d3">
-                <div class="sk-group-lbl">Frameworks &amp; Platforms</div>
+                <div class="sk-group-lbl">Cloud &amp; Infrastructure</div>
                 <div class="sk-tags">
-                    <span class="skill-tag">Node.js</span>
-                    <span class="skill-tag">React</span>
+                    <span class="skill-tag">GCP (Vertex AI, Cloud Run)</span>
                     <span class="skill-tag">AWS</span>
-                    <span class="skill-tag">Google Cloud</span>
+                    <span class="skill-tag">Azure</span>
+                    <span class="skill-tag">Terraform</span>
                     <span class="skill-tag">Power Automate</span>
                 </div>
             </div>
             <div class="sk-group rev d4">
+                <div class="sk-group-lbl">AI &amp; Data</div>
+                <div class="sk-tags">
+                    <span class="skill-tag">AI Agent Development</span>
+                    <span class="skill-tag">LLM Integration</span>
+                    <span class="skill-tag">Machine Learning</span>
+                    <span class="skill-tag">Tableau</span>
+                    <span class="skill-tag">Power BI</span>
+                </div>
+            </div>
+            <div class="sk-group rev d5">
                 <div class="sk-group-lbl">Tools &amp; Methods</div>
                 <div class="sk-tags">
-                    <span class="skill-tag">Tableau</span>
-                    <span class="skill-tag">Git</span>
+                    <span class="skill-tag">GitHub</span>
                     <span class="skill-tag">Jira</span>
-                    <span class="skill-tag">Maven</span>
-                    <span class="skill-tag">IntelliJ</span>
+                    <span class="skill-tag">Postman</span>
+                    <span class="skill-tag">MySQL</span>
+                    <span class="skill-tag">JetBrains IDEs</span>
                     <span class="skill-tag">Agile / Scrum</span>
-                    <span class="skill-tag">SQL</span>
+                    <span class="skill-tag">Waterfall</span>
                 </div>
             </div>
         </div>
@@ -1029,9 +1138,9 @@
             <a href="https://linkedin.com/in/adrian-gomez85" class="c-link" target="_blank" rel="noopener">
                 <i class="fa fa-linkedin" aria-hidden="true"></i> LinkedIn
             </a>
-            <a href="assets/Adrian_Gomez_Resume_2025.pdf" class="c-link" download="Adrian_Gomez_Resume.pdf">
+            <button class="c-link resume-dl-btn" type="button" style="background:transparent;font-family:var(--ff-body);">
                 <i class="fa fa-download" aria-hidden="true"></i> Resume
-            </a>
+            </button>
         </div>
     </div>
 </section>
@@ -1080,25 +1189,6 @@
         });
     });
 
-    /* ── Custom cursor ─────────────────────────────────── */
-    const cur = document.getElementById('cur');
-    const ring = document.getElementById('cur-ring');
-    let mx = 0, my = 0, rx = 0, ry = 0;
-
-    document.addEventListener('mousemove', e => {
-        mx = e.clientX; my = e.clientY;
-        cur.style.left = mx + 'px';
-        cur.style.top  = my + 'px';
-    });
-
-    (function raf() {
-        rx += (mx - rx) * 0.13;
-        ry += (my - ry) * 0.13;
-        ring.style.left = rx + 'px';
-        ring.style.top  = ry + 'px';
-        requestAnimationFrame(raf);
-    })();
-
     /* ── Scroll reveal ─────────────────────────────────── */
     const revEls = document.querySelectorAll('.rev');
     const revObs = new IntersectionObserver(entries => {
@@ -1142,6 +1232,74 @@
             if (heroCta)  heroCta.style.transform  = `translateY(${factor * 0.25}px)`;
         }
     }, { passive: true });
+
+    /* ── CAPTCHA modal ─────────────────────────────────── */
+    (function () {
+        const overlay = document.getElementById('captcha-overlay');
+        const questionEl = document.getElementById('captcha-question');
+        const inputEl = document.getElementById('captcha-input');
+        const errorEl = document.getElementById('captcha-error');
+        const submitBtn = document.getElementById('captcha-submit');
+        const closeBtn = document.getElementById('captcha-close');
+
+        let correctAnswer = 0;
+
+        function generateQuestion() {
+            const a = Math.floor(Math.random() * 12) + 2;
+            const b = Math.floor(Math.random() * 12) + 2;
+            const ops = [
+                { label: `${a} + ${b}`, answer: a + b },
+                { label: `${a} × ${b}`, answer: a * b },
+                { label: `${a + b} − ${b}`, answer: a },
+            ];
+            const q = ops[Math.floor(Math.random() * ops.length)];
+            correctAnswer = q.answer;
+            questionEl.textContent = `What is ${q.label}?`;
+        }
+
+        function openModal() {
+            generateQuestion();
+            inputEl.value = '';
+            errorEl.textContent = '';
+            overlay.classList.add('open');
+            setTimeout(() => inputEl.focus(), 350);
+        }
+
+        function closeModal() {
+            overlay.classList.remove('open');
+        }
+
+        function tryDownload() {
+            const val = parseInt(inputEl.value, 10);
+            if (isNaN(val)) {
+                errorEl.textContent = 'Please enter a number.';
+                return;
+            }
+            if (val !== correctAnswer) {
+                errorEl.textContent = 'Incorrect — try again.';
+                inputEl.value = '';
+                generateQuestion();
+                inputEl.focus();
+                return;
+            }
+            closeModal();
+            const a = document.createElement('a');
+            a.href = 'assets/Adrian_Gomez_Resume_2025.pdf';
+            a.download = 'Adrian_Gomez_Resume.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        document.querySelectorAll('.resume-dl-btn').forEach(btn => {
+            btn.addEventListener('click', openModal);
+        });
+
+        submitBtn.addEventListener('click', tryDownload);
+        closeBtn.addEventListener('click', closeModal);
+        inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') tryDownload(); });
+        overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+    })();
 
     /* ── Staggered skill tags reveal ───────────────────── */
     const tagGroups = document.querySelectorAll('.sk-tags');
